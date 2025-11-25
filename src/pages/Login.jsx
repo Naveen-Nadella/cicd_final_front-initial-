@@ -11,8 +11,11 @@ function Login({ setUser }) {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [dummyOtp, setDummyOtp] = useState(''); // Store the generated dummy OTP
+  const [dummyOtp, setDummyOtp] = useState('');
   const navigate = useNavigate();
+
+  // ⭐ USE API URL FROM ENV
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:30114";
 
   const handlePhonePasswordSubmit = async (e) => {
     e.preventDefault();
@@ -33,8 +36,8 @@ function Login({ setUser }) {
     }
 
     try {
-      // Use axios to validate phone and password with the backend
-      const response = await axios.post('http://localhost:1014/api/auth/login', {
+      // ⭐ FIXED: Correct backend URL using API_URL
+      const response = await axios.post(`${API_URL}/api/auth/login`, {
         mobile: phone,
         password,
       });
@@ -42,8 +45,8 @@ function Login({ setUser }) {
       setUserData(response.data);
       setIsOtpSent(true);
 
-      // Generate a dummy OTP locally (no axios call)
-      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+      // Generate dummy OTP
+      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
       setDummyOtp(generatedOtp);
       setSuccessMessage(`(Captcha: ${generatedOtp})`);
     } catch (err) {
@@ -65,7 +68,6 @@ function Login({ setUser }) {
       return;
     }
 
-    // Verify OTP locally (no axios call)
     setTimeout(() => {
       if (otp !== dummyOtp) {
         setError('Invalid Captcha. Please try again.');
@@ -81,7 +83,7 @@ function Login({ setUser }) {
         navigate('/user');
       }, 1000);
       setLoading(false);
-    }, 1000); // Simulate a 1-second delay for "network" request
+    }, 1000);
   };
 
   const handleResendOtp = () => {
@@ -118,6 +120,7 @@ function Login({ setUser }) {
               disabled={loading}
             />
           </div>
+
           <div className="form-group">
             <label>Password</label>
             <input
@@ -129,6 +132,7 @@ function Login({ setUser }) {
               disabled={loading}
             />
           </div>
+
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? 'Sending...' : 'Send OTP'}
           </button>
@@ -148,9 +152,11 @@ function Login({ setUser }) {
               disabled={loading}
             />
           </div>
+
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? 'Verifying...' : 'Verify OTP'}
           </button>
+
           <button
             type="button"
             className="btn-secondary"
@@ -159,6 +165,7 @@ function Login({ setUser }) {
           >
             {loading ? 'Resending...' : 'Resend OTP'}
           </button>
+
           <button
             type="button"
             className="btn-secondary"
