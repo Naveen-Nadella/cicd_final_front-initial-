@@ -20,9 +20,7 @@ function Signup({ setUser }) {
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
     return age;
   };
 
@@ -50,19 +48,12 @@ function Signup({ setUser }) {
         age,
       });
 
-      console.log('Signup successful:', response.data);
-
-      // Optional: save user
       if (typeof setUser === 'function') setUser(response.data);
 
-      // ✅ Show success alert
       alert('Registration successful! Please login.');
-
-      // ✅ Redirect to login page
       navigate('/');
     } catch (err) {
       setError(err.response?.data || err.message);
-      console.error('Signup failed:', err);
     }
   };
 
@@ -70,6 +61,7 @@ function Signup({ setUser }) {
     <div className="auth-container">
       <h2>Sign Up</h2>
       {error && <p className="error-message">{error}</p>}
+
       <form onSubmit={handleSubmit}>
         {['name', 'email', 'mobile', 'password'].map((field) => (
           <div className="form-group" key={field}>
@@ -80,11 +72,12 @@ function Signup({ setUser }) {
               name={field}
               value={form[field]}
               onChange={handleChange}
-              placeholder={Enter your ${field}}
+              placeholder={`Enter your ${field}`}
               required
             />
           </div>
         ))}
+
         <div className="form-group">
           <label htmlFor="gender">Gender</label>
           <select id="gender" name="gender" value={form.gender} onChange={handleChange} required>
@@ -94,6 +87,7 @@ function Signup({ setUser }) {
             <option value="other">Other</option>
           </select>
         </div>
+
         <div className="form-group">
           <label htmlFor="dob">Date of Birth</label>
           <input
@@ -106,8 +100,10 @@ function Signup({ setUser }) {
             max={new Date().toISOString().split('T')[0]}
           />
         </div>
+
         <button type="submit" className="btn-primary">Sign Up</button>
       </form>
+
       <p>Already have an account? <a href="/">Login</a></p>
     </div>
   );
