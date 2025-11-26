@@ -32,23 +32,18 @@ function Login({ setUser }) {
       return;
     }
 
-    try {
-      const response = await axios.post('http://localhost:1014/api/auth/login', {
-        mobile: phone,
-        password,
-      });
+   // Dummy credentials for user
+if (phone === "9876543210" && password === "User@123") {
+  setUserData({ name: "Demo User", phone });   // optional
+  setIsOtpSent(true);
+  const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  setDummyOtp(generatedOtp);
+  setSuccessMessage(`Captcha: ${generatedOtp}`);
+} else {
+  setError("Invalid phone number or password");
+}
+setLoading(false);
 
-      setUserData(response.data);
-      setIsOtpSent(true);
-
-      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-      setDummyOtp(generatedOtp);
-      setSuccessMessage(`Captcha: ${generatedOtp}`);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Check phone and password.');
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleOtpSubmit = (e) => {
