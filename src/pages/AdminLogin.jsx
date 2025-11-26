@@ -30,21 +30,17 @@ function AdminLogin() {
       return;
     }
 
-    try {
-      const response = await axios.post('http://localhost:1014/api/admin/login', { phone, password });
-      if (response.status === 200) {
-        setIsOtpSent(true);
-        const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-        setDummyOtp(generatedOtp);
-        setSuccessMessage(`(Captcha: ${generatedOtp})`);
-      } else {
-        setError('Invalid phone number or password. Only admins can log in here.');
-      }
-    } catch {
-      setError('Invalid phone number or password. Only admins can log in here.');
-    } finally {
-      setLoading(false);
-    }
+    // Dummy credentials for admin
+if (phone === "9999999999" && password === "Admin@123") {
+  setIsOtpSent(true);
+  const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  setDummyOtp(generatedOtp);
+  setSuccessMessage(`(Captcha: ${generatedOtp})`);
+} else {
+  setError("Invalid phone number or password. Only admins can log in here.");
+}
+setLoading(false);
+
   };
 
   const handleOtpSubmit = (e) => {
