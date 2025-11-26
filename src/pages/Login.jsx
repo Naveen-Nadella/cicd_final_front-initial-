@@ -11,7 +11,7 @@ function Login({ setUser }) {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [dummyOtp, setDummyOtp] = useState(''); // Store the generated dummy OTP
+  const [dummyOtp, setDummyOtp] = useState('');
   const navigate = useNavigate();
 
   const handlePhonePasswordSubmit = async (e) => {
@@ -33,7 +33,6 @@ function Login({ setUser }) {
     }
 
     try {
-      // Use axios to validate phone and password with the backend
       const response = await axios.post('http://localhost:1014/api/auth/login', {
         mobile: phone,
         password,
@@ -42,10 +41,9 @@ function Login({ setUser }) {
       setUserData(response.data);
       setIsOtpSent(true);
 
-      // Generate a dummy OTP locally (no axios call)
-      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
       setDummyOtp(generatedOtp);
-      setSuccessMessage((Captcha: ${generatedOtp}));
+      setSuccessMessage(`Captcha: ${generatedOtp}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Check phone and password.');
     } finally {
@@ -65,7 +63,6 @@ function Login({ setUser }) {
       return;
     }
 
-    // Verify OTP locally (no axios call)
     setTimeout(() => {
       if (otp !== dummyOtp) {
         setError('Invalid Captcha. Please try again.');
@@ -74,14 +71,11 @@ function Login({ setUser }) {
       }
 
       setSuccessMessage('Login successful! Redirecting to dashboard...');
-      if (setUser) {
-        setUser(userData);
-      }
-      setTimeout(() => {
-        navigate('/user');
-      }, 1000);
+      if (setUser) setUser(userData);
+
+      setTimeout(() => navigate('/user'), 1000);
       setLoading(false);
-    }, 1000); // Simulate a 1-second delay for "network" request
+    }, 1000);
   };
 
   const handleResendOtp = () => {
@@ -92,7 +86,7 @@ function Login({ setUser }) {
     setTimeout(() => {
       const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
       setDummyOtp(generatedOtp);
-      setSuccessMessage(OTP resent to: ${phone} (Dummy OTP: ${generatedOtp}));
+      setSuccessMessage(`OTP resent to ${phone} (Dummy OTP: ${generatedOtp})`);
       setLoading(false);
     }, 1000);
   };
@@ -151,20 +145,10 @@ function Login({ setUser }) {
           <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? 'Verifying...' : 'Verify OTP'}
           </button>
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={handleResendOtp}
-            disabled={loading}
-          >
+          <button type="button" className="btn-secondary" onClick={handleResendOtp} disabled={loading}>
             {loading ? 'Resending...' : 'Resend OTP'}
           </button>
-          <button
-            type="button"
-            className="btn-secondary"
-            onClick={() => setIsOtpSent(false)}
-            disabled={loading}
-          >
+          <button type="button" className="btn-secondary" onClick={() => setIsOtpSent(false)} disabled={loading}>
             Back
           </button>
         </form>
