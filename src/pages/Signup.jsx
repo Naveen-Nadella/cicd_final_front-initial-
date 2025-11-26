@@ -80,7 +80,7 @@ function Signup({ setUser }) {
               name={field}
               value={form[field]}
               onChange={handleChange}
-              placeholder={`Enter your ${field}`}
+              placeholder={Enter your ${field}}
               required
             />
           </div>
