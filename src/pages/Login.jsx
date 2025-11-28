@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 
 function Login({ setUser }) {
   const [phone, setPhone] = useState('');
@@ -13,7 +14,7 @@ function Login({ setUser }) {
   const [dummyOtp, setDummyOtp] = useState('');
   const navigate = useNavigate();
 
-  const handlePhonePasswordSubmit = (e) => {
+  const handlePhonePasswordSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
@@ -31,18 +32,23 @@ function Login({ setUser }) {
       return;
     }
 
-    // 🔥 Dummy credentials
-    if (phone === "9876543210" && password === "User@123") {
+    try {
+      const response = await axios.post('http://localhost:1014/api/auth/login', {
+        mobile: phone,
+        password,
+      });
+
+      setUserData(response.data);
+      setIsOtpSent(true);
+
       const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
       setDummyOtp(generatedOtp);
-      setUserData({ name: "Demo User", phone });
-      setIsOtpSent(true);
-      setSuccessMessage(`Captcha: ${generatedOtp}`);
-    } else {
-      setError("Invalid phone number or password");
+      setSuccessMessage(Captcha: ${generatedOtp});
+    } catch (err) {
+      setError(err.response?.data?.message || 'Login failed. Check phone and password.');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handleOtpSubmit = (e) => {
@@ -51,25 +57,38 @@ function Login({ setUser }) {
     setSuccessMessage('');
     setLoading(true);
 
-    if (otp !== dummyOtp) {
-      setError('Invalid Captcha. Please try again.');
+    if (!otp.trim() || otp.length !== 6) {
+      setError('Enter a valid 6-digit Captcha');
       setLoading(false);
       return;
     }
 
-    setSuccessMessage("Login successful! Redirecting to dashboard...");
+    setTimeout(() => {
+      if (otp !== dummyOtp) {
+        setError('Invalid Captcha. Please try again.');
+        setLoading(false);
+        return;
+      }
 
-    // Save login data
-    if (setUser) setUser(userData || { name: "Demo User", phone });
-    localStorage.setItem("userLogin", JSON.stringify({ name: "Demo User", phone }));
+      setSuccessMessage('Login successful! Redirecting to dashboard...');
+      if (setUser) setUser(userData);
 
-    setTimeout(() => navigate('/user'), 1000);
+      setTimeout(() => navigate('/user'), 1000);
+      setLoading(false);
+    }, 1000);
   };
 
   const handleResendOtp = () => {
-    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    setDummyOtp(generatedOtp);
-    setSuccessMessage(`OTP resent (Dummy OTP: ${generatedOtp})`);
+    setError('');
+    setSuccessMessage('');
+    setLoading(true);
+
+    setTimeout(() => {
+      const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      setDummyOtp(generatedOtp);
+      setSuccessMessage(OTP resent to ${phone} (Dummy OTP: ${generatedOtp}));
+      setLoading(false);
+    }, 1000);
   };
 
   return (
@@ -82,31 +101,58 @@ function Login({ setUser }) {
         <form onSubmit={handlePhonePasswordSubmit}>
           <div className="form-group">
             <label>Phone Number</label>
-            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={10} required />
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Enter 10-digit phone number"
+              required
+              pattern="[0-9]{10}"
+              maxLength={10}
+              disabled={loading}
+            />
           </div>
           <div className="form-group">
             <label>Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+              disabled={loading}
+            />
           </div>
-          <button type="submit" className="btn-primary">Send OTP</button>
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? 'Sending...' : 'Send OTP'}
+          </button>
         </form>
       ) : (
         <form onSubmit={handleOtpSubmit}>
           <div className="form-group">
             <label>Enter Captcha</label>
-            <input type="text" value={otp} onChange={(e) => setOtp(e.target.value)} maxLength={6} required />
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="Enter the 6-digit captcha"
+              maxLength={6}
+              required
+              pattern="[0-9]{6}"
+              disabled={loading}
+            />
           </div>
-          <button type="submit" className="btn-primary">Verify OTP</button>
-          <button type="button" className="btn-secondary" onClick={handleResendOtp}>Resend OTP</button>
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? 'Verifying...' : 'Verify OTP'}
+          </button>
+          <button type="button" className="btn-secondary" onClick={handleResendOtp} disabled={loading}>
+            {loading ? 'Resending...' : 'Resend OTP'}
+          </button>
+          <button type="button" className="btn-secondary" onClick={() => setIsOtpSent(false)} disabled={loading}>
+            Back
+          </button>
         </form>
       )}
 
       <div className="auth-links">
-        <p>New user? <Link to="/signup">Sign up here</Link></p>
-        <p>Admin? <Link to="/admin">Admin Login</Link></p>
-      </div>
-    </div>
-  );
-}
-
-export default Login;
+        <p>New user? <Link to="/signu
